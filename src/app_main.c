@@ -540,8 +540,6 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                         THROW(APDU_CODE_WRONG_LENGTH);
                     }
 
-                    THROW(0x8888);
-                    tx_display_index_root();
                     view_set_handlers(smsg_getData, smsg_accept, smsg_reject);
                     view_smsg_show(0);
                     
