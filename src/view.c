@@ -424,17 +424,11 @@ void view_status(unsigned int ignored) {
 
 void view_tx_show(unsigned int start_page) {
     if (ehGetData == NULL) { return; }
-    viewexpl_start(start_page,
-                   ehGetData,
-                   NULL,
-                   view_tx_menu);
+    viewexpl_start(start_page, ehGetData,  NULL, view_tx_menu);
 }
 
 void view_smsg_show(unsigned int start_page) {
-    if (!ehGetData)  {
-        return;
-    }
-
+    if (ehGetData == NULL) { return; }
     viewexpl_start(start_page, ehGetData, NULL, view_smsg_menu);
 }
 
