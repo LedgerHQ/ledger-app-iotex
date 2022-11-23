@@ -532,21 +532,22 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                 }
 
                 case INS_SIGN_PERSONAL_MESSAGE: {
-                    if (process_chunk(tx, rx, true)) {
-                        /* Maximum sign message length is 255 */
-                        if (transaction_get_buffer_length() > 255) {
-                            THROW(APDU_CODE_WRONG_LENGTH);
-                        }
+                    if (!process_chunk(tx, rx, true))
+                        THROW(APDU_CODE_OK);
 
-                        tx_display_index_root();
-                        view_set_handlers(smsg_getData, smsg_accept, smsg_reject);
-                        view_smsg_show(0);
-                      
-                        *flags |= IO_ASYNCH_REPLY;
+                    /* Maximum sign message length is 255 */
+                    if (transaction_get_buffer_length() > 255) {
+                        THROW(APDU_CODE_WRONG_LENGTH);
                     }
-                    THROW(APDU_CODE_OK);
+
+                    THROW(0x8888);
+                    tx_display_index_root();
+                    view_set_handlers(smsg_getData, smsg_accept, smsg_reject);
+                    view_smsg_show(0);
+                    
+                    *flags |= IO_ASYNCH_REPLY;
+                    break;
                 }
-                break;
 
 #ifdef TESTING_ENABLED
                 case INS_HASH_TEST: {
