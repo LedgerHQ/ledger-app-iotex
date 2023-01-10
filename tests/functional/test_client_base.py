@@ -1,5 +1,6 @@
 from client import IotexClient
-from dataset import TestCase, TEST_CASES
+from dataset import DataTestCase
+
 
 SPECULOS_PUBLIC_KEY = bytes.fromhex("0435c29a7915347e0d44c39f277e0668d59eb7180e99954f67285ea8eae62a5bd"
                                     "ad625a01be2705ed07572541854350ebcfc4c880eaa37121b9b6d2613cf7eb31b")
@@ -13,5 +14,5 @@ def test_get_public_key(client: IotexClient):
 def test_get_address(client: IotexClient):
     assert client.get_address() == SPECULOS_ADDRESS
 
-def test_signature(client: IotexClient, test_case: TestCase):
-    assert client.sign(test_case.input) == test_case.output
+def test_signature(client: IotexClient, test_case: DataTestCase):
+    assert client.sign(test_case.input, test_case.validation) == test_case.output

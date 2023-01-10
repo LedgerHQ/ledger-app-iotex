@@ -66,3 +66,5 @@ src/glyphs\.h
 src/glyphs\.c
 
 tests/elfs/
+__pycache__
+*pyc

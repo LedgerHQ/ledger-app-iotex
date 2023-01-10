@@ -2,8 +2,8 @@ from enum import IntEnum
 from ragger.backend import BackendInterface
 from ragger.bip.path import pack_derivation_path
 from ragger.firmware import Firmware
-from ragger.utils import RAPDU
-from typing import Optional
+from ragger.navigator import NavInsID, NanoNavigator
+from typing import List, Optional
 
 
 def change_path_endianness(path: bytes) -> bytes:
@@ -41,6 +41,7 @@ class IotexClient:
         self._backend = backend
         self._firmware = firmware
         self._derivation_path = bip32(derivation_path) if derivation_path else None
+        self._navigator = NanoNavigator(backend, firmware)
 
     @property
     def derivation_path(self) -> bytes:
@@ -77,19 +78,14 @@ class IotexClient:
                                       p2=0x02,
                                       data=payload).data
 
-    def _approve_signature(self, length: int = 1) -> None:
-        self._backend.right_click()
-        self._backend.right_click()
-        self._backend.both_click()
-
-    def _sign(self, ins: Instruction, payload: bytes) -> bytes:
+    def _sign(self, ins: Instruction, payload: bytes, navigation: List[NavInsID]) -> bytes:
         self._init_signature()
         with self._backend.exchange_async(CLA, ins, p1=0x02, p2=0x02, data=payload):
-            self._approve_signature(1)
+            self._navigator.navigate(navigation)
         return self._backend.last_async_response.data
 
-    def sign(self, payload: bytes) -> bytes:
-        return self._sign(Instruction.SIGN_PERSONAL_MESSAGE, payload)
+    def sign(self, payload: bytes, navigation: List[NavInsID]) -> bytes:
+        return self._sign(Instruction.SIGN_PERSONAL_MESSAGE, payload, navigation)
 
-    def sign_raw(self, payload: bytes) -> bytes:
-        return self._sign(Instruction.SIGN_PERSONAL_MESSAGE, payload)
+    def sign_raw(self, payload: bytes, navigation: List[NavInsID]) -> bytes:
+        return self._sign(Instruction.SIGN_PERSONAL_MESSAGE, payload, navigation)
