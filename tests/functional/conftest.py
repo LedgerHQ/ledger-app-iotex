@@ -6,6 +6,8 @@ from ragger.backend import SpeculosBackend, LedgerCommBackend, LedgerWalletBacke
 from ragger.navigator import NanoNavigator
 from ragger.utils import app_path_from_app_name
 
+from client import IotexClient
+from dataset import TEST_CASES
 
 # This variable is needed for Speculos only (physical tests need the application to be already installed)
 # Adapt this path to your 'tests/elfs' directory
@@ -89,6 +91,9 @@ def pytest_generate_tests(metafunc):
                     ids.append(fw.device + " " + fw.version)
 
         metafunc.parametrize("firmware", fw_list, ids=ids, scope="session")
+    if "test_case" in metafunc.fixturenames:
+        metafunc.parametrize("test_case", [pytest.param(tc, id=tc.name) for tc in TEST_CASES])
+
 
 
 def prepare_speculos_args(firmware: Firmware, display: bool):
@@ -143,6 +148,9 @@ def use_only_on_backend(request, backend):
         if current_backend != backend:
             pytest.skip(f'skipped on this backend: "{current_backend}"')
 
+@pytest.fixture(scope="session")
+def client(backend, firmware):
+    yield IotexClient(backend, firmware, "m/44'/304'/0'/0/0")
 
 def pytest_configure(config):
     config.addinivalue_line(
