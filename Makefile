@@ -32,7 +32,7 @@ APP_LOAD_PARAMS += --appFlags 0x200 --delete $(COMMON_LOAD_PARAMS) --path "44'/3
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 ICONNAME:=$(CURDIR)/icons/nanos.gif
 else ifeq ($(TARGET_NAME), TARGET_FATSTACKS)
-ICONNAME:=$(CURDIR)/icons/nanos.gif
+ICONNAME:=$(CURDIR)/icons/stax.gif
 else
 ICONNAME:=$(CURDIR)/icons/nanox.gif
 endif
