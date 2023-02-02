@@ -34,7 +34,7 @@ extern "C" {
 
 #define NV_ALIGN __attribute__ ((aligned(64)))
 
-#if defined (TARGET_NANOS) || defined(TARGET_NANOX) || defined(TARGET_NANOS2)
+#if defined (TARGET_NANOS) || defined(TARGET_NANOX) || defined(TARGET_NANOS2) || defined(TARGET_FATSTACKS)
 
 #include "bolos_target.h"
 #include "os.h"
