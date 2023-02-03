@@ -27,8 +27,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <os_io_seproxyhal.h>
-#include <nbgl_use_case.h>
 #include <ux.h>
+
+#include <nbgl_use_case.h>
 
 ux_state_t G_ux;
 bolos_ux_params_t G_ux_params;
@@ -74,33 +75,78 @@ static void on_quit(void) {
     os_sched_exit(-1);
 }
 
+enum {
+    CONTRACT_DATA_TOKEN = FIRST_USER_TOKEN,
+    SHOW_ACCOUNT_TOKEN,
+};
+
 
 /*
- * About menu
+ * Settings menu
  */
 static const char *const infoTypes[] = {"Version", "IoTeX"};
 static const char *const infoContents[] = {APPVERSION, "(c) 2023 IoTeX Foundation"};
 
-static bool on_infos(uint8_t page, nbgl_pageContent_t *content) {
+#define SETTINGS_CHARSET_OPTIONS_NUMBER 5
+#define SETTINGS_MISC_OPTIONS_NUMBER    1
+#define SETTINGS_INFO_NUMBER            2
+#define SETTINGS_PAGE_NUMBER            3
+
+static nbgl_layoutSwitch_t switches[1];
+static const char * const bars_text[1] = { "Display account address" };
+static const uint8_t bars_token[1] = { SHOW_ACCOUNT_TOKEN };
+
+static bool display_settings_navigation(uint8_t page, nbgl_pageContent_t *content) {
     if (page == 0) {
+        content->type = BARS_LIST;
+        content->barsList.barTexts = &bars_text[0];
+        content->barsList.tokens = &bars_token[0];
+        content->barsList.nbBars = 1;
+        content->barsList.tuneId = TUNE_TAP_CASUAL;
+    } else if (page == 1) {
+        switches[0] = (nbgl_layoutSwitch_t){.initState = N_settings.contractDataAllowed,
+                                            .text = "Allow contract data",
+                                            .subText = NULL,
+                                            .token = CONTRACT_DATA_TOKEN,
+                                            .tuneId = TUNE_TAP_CASUAL};
+        content->type = SWITCHES_LIST;
+        content->switchesList.nbSwitches = SETTINGS_MISC_OPTIONS_NUMBER;
+        content->switchesList.switches = &switches[0];
+    } else if (page == 2) {
         content->type = INFOS_LIST;
-        content->infosList.nbInfos = 2;
+        content->infosList.nbInfos = SETTINGS_INFO_NUMBER;
         content->infosList.infoTypes = (const char **) infoTypes;
         content->infosList.infoContents = (const char **) infoContents;
-        return true;
+    } else {
+        return false;
     }
-    return false;
+    return true;
+}
+
+static void charset_settings_callback(const int token,
+                                      const uint8_t index __attribute__((unused))) {
+    if (token == CONTRACT_DATA_TOKEN) {
+        uint8_t value = !N_settings.contractDataAllowed;
+        PRINTF("Writting new value for contractDataAllowed settings: '%d'\n", value);
+        nvm_write((void*) &N_settings.contractDataAllowed, (void*) &value, sizeof(uint8_t));
+    }
 }
 
 static void display_settings_page() {
-    nbgl_useCaseSettings("IoTeX infos", 0, 1, false, display_home_page, on_infos, NULL);
+    nbgl_useCaseSettings("IoTeX infos",
+                         0,
+                         SETTINGS_PAGE_NUMBER,
+                         false,
+                         display_home_page,
+                         display_settings_navigation,
+                         charset_settings_callback);
 }
 
 static void display_home_page() {
     nbgl_useCaseHomeExt("IoTeX",
                         &C_iotex_ledger64_white,
                         "",
-                        false,
+                        true,
                         NULL,
                         NULL,
                         display_settings_page,

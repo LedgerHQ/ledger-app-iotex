@@ -51,7 +51,6 @@ all: default
 # Platform
 
 DEFINES   += UNUSED\(x\)=\(void\)x
-DEFINES   += PRINTF\(...\)=
 
 APPVERSION=$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
 DEFINES   += APPVERSION=\"$(APPVERSION)\"
@@ -92,6 +91,21 @@ else
     DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
 
     APP_LOAD_PARAMS += --appFlags 0x200
+endif
+
+DEBUG = 0
+ifneq ($(DEBUG), 0)
+    $(info DEBUG enabled)
+    DEFINES += HAVE_IO_USB HAVE_USB_APDU
+    SDK_SOURCE_PATH  += lib_stusb lib_stusb_impl
+    DEFINES += HAVE_PRINTF
+    ifeq ($(TARGET_NAME), TARGET_NANOS)
+        DEFINES += PRINTF=screen_printf
+    else
+        DEFINES += PRINTF=mcu_usb_printf
+    endif
+else
+    DEFINES += PRINTF\(...\)=
 endif
 
 
