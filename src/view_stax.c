@@ -18,18 +18,20 @@
 
 #if defined(HAVE_NBGL)
 
-#include "view.h"
-
-#include <ux.h>
-#include <os_io_seproxyhal.h>
-
 #include <zxmacros.h>
 
+#include "view.h"
 #include "crypto.h"
 #include "settings.h"
 
 #include <string.h>
 #include <stdio.h>
+#include <os_io_seproxyhal.h>
+#include <nbgl_use_case.h>
+#include <ux.h>
+
+ux_state_t G_ux;
+bolos_ux_params_t G_ux_params;
 
 viewctl_delegate_getData ehGetData = NULL;
 viewctl_delegate_accept ehAccept = NULL;
@@ -65,9 +67,45 @@ struct {
     uint32_t index;
 } view_addr_choose_data;
 
-#include <ux.h>
-ux_state_t G_ux;
-bolos_ux_params_t G_ux_params;
+
+static void display_home_page();
+
+static void on_quit(void) {
+    os_sched_exit(-1);
+}
+
+
+/*
+ * About menu
+ */
+static const char *const infoTypes[] = {"Version", "IoTeX"};
+static const char *const infoContents[] = {APPVERSION, "(c) 2023 IoTeX Foundation"};
+
+static bool on_infos(uint8_t page, nbgl_pageContent_t *content) {
+    if (page == 0) {
+        content->type = INFOS_LIST;
+        content->infosList.nbInfos = 2;
+        content->infosList.infoTypes = (const char **) infoTypes;
+        content->infosList.infoContents = (const char **) infoContents;
+        return true;
+    }
+    return false;
+}
+
+static void display_settings_page() {
+    nbgl_useCaseSettings("IoTeX infos", 0, 1, false, display_home_page, on_infos, NULL);
+}
+
+static void display_home_page() {
+    nbgl_useCaseHomeExt("IoTeX",
+                        &C_iotex_ledger64_white,
+                        "",
+                        false,
+                        NULL,
+                        NULL,
+                        display_settings_page,
+                        on_quit);
+}
 
 /********************
  * Public functions *
@@ -75,6 +113,7 @@ bolos_ux_params_t G_ux_params;
 
 void view_init(void) {
     nbgl_objInit();
+    display_home_page();
 }
 
 void view_idle(unsigned int _ __attribute__((unused))) {
