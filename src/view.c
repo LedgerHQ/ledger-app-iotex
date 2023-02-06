@@ -414,13 +414,12 @@ void view_idle(unsigned int ignored) {
 #endif
 }
 
+#if defined(TARGET_NANOS)
 void view_status(unsigned int ignored) {
     UNUSED(ignored);
-
-#if defined(TARGET_NANOS)
     UX_MENU_DISPLAY(0, menu_status, NULL);
-#endif
 }
+#endif // TARGET_NANOS
 
 void view_tx_show(unsigned int start_page) {
     if (ehGetData == NULL) { return; }

@@ -35,8 +35,10 @@ void view_init(void);
 /// view_idle (idle view - main menu + status)
 void view_idle(unsigned int ignored);
 
+#if defined(TARGET_NANOS)
 /// view_status
 void view_status();
+#endif // TARGET_NANOS
 
 /// view_tx_show (show/review transaction view)
 void view_tx_show(unsigned int start_page);
