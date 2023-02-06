@@ -16,16 +16,12 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "view.h"
-#include "view_templates.h"
-#include "view_expl.h"
-
-#include "ux.h"
-#include "bagl.h"
-#include "zxmacros.h"
-
+// BOLOS
 #include <string.h>
-#include <stdio.h>
+// ZXLIB
+#include <zxmacros.h>
+
+#include "view_common.h"
 
 void viewctl_display_page();
 
@@ -65,19 +61,6 @@ void viewctl_start(int start_page,
 
 //------ Event handlers
 
-const bagl_element_t *ui_view_info_prepro(const bagl_element_t *element) {
-
-    switch (element->component.userid) {
-        case 0x01:
-            UX_CALLBACK_SET_INTERVAL(2000);
-            break;
-        case 0x02:
-            UX_CALLBACK_SET_INTERVAL(MAX(3000, 1000 + bagl_label_roundtrip_duration_ms(element, 7)));
-            break;
-    }
-    return element;
-}
-
 void submenu_left() {
     viewctl.chunksIndex--;
     viewctl.scrolling_mode = PENDING;
@@ -114,7 +97,7 @@ void menu_right() {
     }
 }
 
-void viewctl_crop_key() {
+static void viewctl_crop_key() {
     int offset = strlen(viewctl.dataKey) - MAX_SCREEN_LINE_WIDTH;
     if (offset > 0) {
         char *start = viewctl.dataKey;

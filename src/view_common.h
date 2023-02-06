@@ -19,8 +19,8 @@
 
 #include <stdint.h>
 
-#include "os.h"
-#include "cx.h"
+#include <os.h>
+#include <cx.h>
 
 #define MAX_CHARS_TITLE             32
 #define MAX_CHARS_PER_KEY_LINE      64

@@ -16,17 +16,19 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "view.h"
-#include "view_templates.h"
-#include "view_expl.h"
+#if defined(HAVE_BAGL)
 
-#include "ux.h"
-#include "bagl.h"
-#include "zxmacros.h"
-#include "os_io_seproxyhal.h"
+#include <view_templates.h>
+#include <zxmacros.h>
+#include <ux.h>
+#include <bagl.h>
+#include <os_io_seproxyhal.h>
 
 #include <string.h>
 #include <stdio.h>
+
+#include "view.h"
+#include "view_expl.h"
 
 #if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 static const bagl_element_t viewexpl_bagl[] = {
@@ -189,3 +191,5 @@ void viewexpl_start(int start_page,
                     viewctl_delegate_exit ehExit) {
     viewctl_start(start_page, ehUpdate, ehReady, ehExit, viewexpl_display_ux);
 }
+
+#endif // HAVE_BAGL

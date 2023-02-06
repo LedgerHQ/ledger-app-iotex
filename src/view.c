@@ -16,14 +16,18 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "view.h"
-#include "view_templates.h"
-#include "view_expl.h"
+#if defined(HAVE_BAGL)
 
-#include "ux.h"
-#include "os_io_seproxyhal.h"
-#include "bagl.h"
-#include "zxmacros.h"
+#include "view.h"
+
+#include <ux.h>
+#include <os_io_seproxyhal.h>
+
+#include <bagl.h>
+#include <view_templates.h>
+
+#include <zxmacros.h>
+
 #include "crypto.h"
 #include "settings.h"
 
@@ -577,3 +581,5 @@ void view_set_handlers(viewctl_delegate_getData func_getData,
     ehAccept = func_accept;
     ehReject = func_reject;
 }
+
+#endif // HAVE_BAGL

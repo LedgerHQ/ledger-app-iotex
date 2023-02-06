@@ -17,8 +17,9 @@
 ********************************************************************************/
 #pragma once
 
-#include "os.h"
-#include "cx.h"
+#include <os.h>
+#include <cx.h>
+
 #include "view_common.h"
 #include "view_expl.h"
 
