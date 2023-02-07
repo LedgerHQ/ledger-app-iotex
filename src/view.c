@@ -52,36 +52,37 @@ viewctl_delegate_reject ehReject = NULL;
 #define UIID_MARKER1    0x60
 #define UIID_MARKER2    0x61
 
-void accept_operation(unsigned int _) {
+static void accept_operation(unsigned int _) {
     UNUSED(_);
     if (ehAccept != NULL) ehAccept();
 }
 
-void reject_operation(unsigned int _) {
+static void reject_operation(unsigned int _) {
     UNUSED(_);
     if (ehReject != NULL) ehReject();
 }
 
-void show_idle_menu() {
+static void show_idle_menu() {
     view_idle(0);
 }
 
 /* Tx */
-void view_tx_menu(unsigned int _);
+static void view_tx_menu(unsigned int _);
 
 /* Sign message */
-void view_smsg_menu(unsigned int _);
+static void view_smsg_menu(unsigned int _);
 
 /* Settings */
-void view_app_settings(unsigned int _);
-void view_settings_show(unsigned int _);
-void view_contract_data_allow(unsigned int _);
-void view_contract_data_disallow(unsigned int _);
+static void view_app_settings(unsigned int _);
+static void view_settings_show(unsigned int _);
+static void view_contract_data_allow(unsigned int _);
+static void view_contract_data_disallow(unsigned int _);
 
 /* Show Address */
-void view_addr_choose_show(unsigned int _);
-void view_addr_choose_refresh();
-void view_addr_choose_update();
+static void view_addr_choose_show(unsigned int _);
+static void view_addr_choose_refresh();
+static void view_addr_choose_update();
+
 
 struct {
     // modes
@@ -98,7 +99,7 @@ struct {
 
 #if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 
-#include "ux.h"
+#include <ux.h>
 ux_state_t G_ux;
 bolos_ux_params_t G_ux_params;
 
@@ -246,7 +247,7 @@ static const bagl_element_t view_addr_choose[] = {
 #endif
 };
 
-const bagl_element_t *view_addr_choose_prepro(const bagl_element_t *element) {
+static const bagl_element_t *view_addr_choose_prepro(const bagl_element_t *element) {
     switch (element->component.userid) {
         case UIID_MARKER1:
             if (view_addr_choose_data.status.mode != VIEW_ADDR_MODE_ACCOUNT)
@@ -414,13 +415,12 @@ void view_idle(unsigned int ignored) {
 #endif
 }
 
+#if defined(TARGET_NANOS)
 void view_status(unsigned int ignored) {
     UNUSED(ignored);
-
-#if defined(TARGET_NANOS)
     UX_MENU_DISPLAY(0, menu_status, NULL);
-#endif
 }
+#endif // TARGET_NANOS
 
 void view_tx_show(unsigned int start_page) {
     if (ehGetData == NULL) { return; }
@@ -438,7 +438,7 @@ void view_smsg_show(unsigned int start_page) {
     viewexpl_start(start_page, ehGetData, NULL, view_smsg_menu);
 }
 
-void view_addr_choose_update() {
+static void view_addr_choose_update() {
     print_title("Account %u", view_addr_choose_data.account);
     viewctl.dataKey[0] = 0;
 
@@ -465,11 +465,11 @@ void view_addr_choose_update() {
     viewctl_dataValue_split();
 }
 
-void view_addr_choose_refresh() {
+static void view_addr_choose_refresh() {
     UX_DISPLAY(view_addr_choose, view_addr_choose_prepro);
 }
 
-void view_addr_choose_show(unsigned int _) {
+static void view_addr_choose_show(unsigned int _) {
     UNUSED(_);
 
     // Initialize show view
@@ -486,7 +486,7 @@ void view_addr_choose_show(unsigned int _) {
 }
 
 
-void view_settings_show(unsigned int _) {
+static void view_settings_show(unsigned int _) {
     UNUSED(_);
 #if defined(TARGET_NANOS)
     UX_MENU_DISPLAY(2, menu_main, NULL);
@@ -498,7 +498,7 @@ void view_settings_show(unsigned int _) {
 #endif
 }
 
-void view_contract_data_allow(unsigned int _) {
+static void view_contract_data_allow(unsigned int _) {
     UNUSED(_);
 
     uint8_t value = 1;
@@ -506,7 +506,7 @@ void view_contract_data_allow(unsigned int _) {
     view_app_settings(0);
 }
 
-void view_contract_data_disallow(unsigned int _) {
+static void view_contract_data_disallow(unsigned int _) {
     UNUSED(_);
     uint8_t value = 0;
     nvm_write((void*) &N_settings.contractDataAllowed, (void*) &value, sizeof(uint8_t));
@@ -544,7 +544,7 @@ void view_addr_confirm(unsigned int _) {
 #endif
 }
 
-void view_tx_menu(unsigned int unused) {
+static void view_tx_menu(unsigned int unused) {
     UNUSED(unused);
 
 #if defined(TARGET_NANOS)
@@ -557,7 +557,7 @@ void view_tx_menu(unsigned int unused) {
 #endif
 }
 
-void view_smsg_menu(unsigned int unused) {
+static void view_smsg_menu(unsigned int unused) {
     UNUSED(unused);
 
 #if defined(TARGET_NANOS)
