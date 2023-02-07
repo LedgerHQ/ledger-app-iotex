@@ -17,10 +17,41 @@
 ********************************************************************************/
 #pragma once
 
-#include "os.h"
-#include "cx.h"
+#include <os.h>
+#include <cx.h>
+
 #include "view_common.h"
 #include "view_expl.h"
+
+typedef struct {
+    // modes
+    // 0 - select account
+    // 1 - select index
+    struct {
+        unsigned int mode: 4;
+        unsigned int marker_blink: 1;
+    } status;
+    uint32_t account;
+    uint32_t index;
+} view_addr_choose_data_t;
+
+#define MAX_VAL(a, b) ( (a)>(b) ? (a) : (b) )
+#define MIN_VAL(a, b) ( (a)<(b) ? (a) : (b) )
+
+#define VIEW_ADDR_MODE_ACCOUNT 0
+#define VIEW_ADDR_MODE_INDEX 1
+#define VIEW_ADDR_MODE_SHOW 2
+#define VIEW_ADDR_MODE_CONFIRM 3
+
+#define UIID_ICONACCEPT 0x50
+#define UIID_ICONREJECT 0x51
+#define UIID_ICONLEFT1  0x52
+#define UIID_ICONRIGHT1 0x53
+#define UIID_ICONLEFT2  0x54
+#define UIID_ICONRIGHT2 0x55
+
+#define UIID_MARKER1    0x60
+#define UIID_MARKER2    0x61
 
 //------ Event handlers
 /// view_set_handlers
@@ -37,7 +68,7 @@ void view_idle(unsigned int ignored);
 
 #if defined(TARGET_NANOS)
 /// view_status
-void view_status();
+void view_status(void);
 #endif // TARGET_NANOS
 
 /// view_tx_show (show/review transaction view)

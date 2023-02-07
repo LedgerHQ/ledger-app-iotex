@@ -23,8 +23,10 @@
 #include <os.h>
 #include <ux.h>
 
+#if defined(HAVE_BAGL)
 #include <zxmacros.h>
 #include <bech32.h>
+#endif
 
 #include "lib/transaction.h"
 #include "lib/tx_display.h"
@@ -52,20 +54,26 @@ unsigned char io_event(unsigned char channel) {
     UNUSED(channel);
 
     switch (G_io_seproxyhal_spi_buffer[0]) {
-        case SEPROXYHAL_TAG_FINGER_EVENT: //
+        case SEPROXYHAL_TAG_FINGER_EVENT:
             UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);
             break;
 
+#if !defined(HAVE_NBGL)
         case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT: // for Nano S
             UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
             break;
+#endif
 
         case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
+#if !defined(HAVE_NBGL)
             if (!UX_DISPLAYED())
                 UX_DISPLAYED_EVENT();
+#else
+            UX_DEFAULT_EVENT();
+#endif
             break;
 
-        case SEPROXYHAL_TAG_TICKER_EVENT: { //
+        case SEPROXYHAL_TAG_TICKER_EVENT: {
             UX_TICKER_EVENT(G_io_seproxyhal_spi_buffer, {
                     if (UX_ALLOWED) {
                         UX_REDISPLAY();
@@ -211,8 +219,11 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     G_io_apdu_buffer[1] = LEDGER_MAJOR_VERSION;
                     G_io_apdu_buffer[2] = LEDGER_MINOR_VERSION;
                     G_io_apdu_buffer[3] = LEDGER_PATCH_VERSION;
+#if defined(HAVE_BAGL)
                     G_io_apdu_buffer[4] = !IS_UX_ALLOWED;
-
+#elif defined(HAVE_NBGL)
+                    G_io_apdu_buffer[4] = false;
+#endif
                     *tx += 5;
                     THROW(APDU_CODE_OK);
                     break;

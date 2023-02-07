@@ -2,6 +2,8 @@ from enum import IntEnum
 from ragger.backend import BackendInterface
 from ragger.bip.path import pack_derivation_path
 from ragger.firmware import Firmware
+from ragger.firmware.stax import MetaScreen
+from ragger.firmware.stax.use_cases import UseCaseChoice
 from ragger.navigator import NavInsID, NanoNavigator
 from typing import List, Optional
 
@@ -35,7 +37,8 @@ class Instruction(IntEnum):
     SIGN_SECP256K1_TEST       = 0x66
 
 
-class IotexClient:
+class IotexClient(metaclass=MetaScreen):
+    use_case_choice = UseCaseChoice
 
     def __init__(self, backend: BackendInterface, firmware: Firmware, derivation_path: Optional[str] = None):
         self._backend = backend
@@ -63,6 +66,8 @@ class IotexClient:
             self._backend.right_click()  # display address
             self._backend.right_click()  # display validation screen
             self._backend.both_click()  # validate
+        elif self._firmware.device == "stax":
+            self.choice.confirm()
 
     def get_address(self) -> bytes:
         payload = bytes([len(HRP)]) + HRP + self.derivation_path

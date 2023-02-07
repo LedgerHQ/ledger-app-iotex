@@ -30,9 +30,11 @@ APPVERSION_P=6
 APP_LOAD_PARAMS += --appFlags 0x200 --delete $(COMMON_LOAD_PARAMS) --path "44'/304'"
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
-ICONNAME:=$(CURDIR)/nanos_icon.gif
+ICONNAME:=$(CURDIR)/icons/nanos.gif
+else ifeq ($(TARGET_NAME), TARGET_FATSTACKS)
+ICONNAME:=$(CURDIR)/icons/stax.gif
 else
-ICONNAME:=$(CURDIR)/nanox_icon.gif
+ICONNAME:=$(CURDIR)/icons/nanox.gif
 endif
 
 ifndef ICONNAME
@@ -41,70 +43,94 @@ endif
 
 all: default
 
-# Pending review parameters
-APP_LOAD_PARAMS += --tlvraw 9F:01
-DEFINES += HAVE_PENDING_REVIEW_SCREEN
+# # Pending review parameters
+# APP_LOAD_PARAMS += --tlvraw 9F:01
+# DEFINES += HAVE_PENDING_REVIEW_SCREEN
 
 ############
 # Platform
 
 DEFINES   += UNUSED\(x\)=\(void\)x
-DEFINES   += PRINTF\(...\)=
 
 APPVERSION=$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
 DEFINES   += APPVERSION=\"$(APPVERSION)\"
 
 DEFINES += OS_IO_SEPROXYHAL
-DEFINES += HAVE_BAGL HAVE_SPRINTF
+DEFINES += HAVE_SPRINTF
 DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=7 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
 
 DEFINES += LEDGER_MAJOR_VERSION=$(APPVERSION_M) LEDGER_MINOR_VERSION=$(APPVERSION_N) LEDGER_PATCH_VERSION=$(APPVERSION_P)
 
-DEFINES   += USB_SEGMENT_SIZE=64
-DEFINES   += HAVE_BOLOS_APP_STACK_CANARY
+DEFINES += USB_SEGMENT_SIZE=64
+DEFINES += HAVE_BOLOS_APP_STACK_CANARY
 
-WEBUSB_URL     = www.ledgerwallet.com
-DEFINES       += HAVE_WEBUSB WEBUSB_URL_SIZE_B=$(shell echo -n $(WEBUSB_URL) | wc -c) WEBUSB_URL=$(shell echo -n $(WEBUSB_URL) | sed -e "s/./\\\'\0\\\',/g")
+WEBUSB_URL =  www.ledgerwallet.com
+DEFINES    += HAVE_WEBUSB WEBUSB_URL_SIZE_B=$(shell echo -n $(WEBUSB_URL) | wc -c) WEBUSB_URL=$(shell echo -n $(WEBUSB_URL) | sed -e "s/./\\\'\0\\\',/g")
 
-ifeq ($(TARGET_NAME),TARGET_NANOS)
-# Nano S
-DEFINES       += IO_SEPROXYHAL_BUFFER_SIZE_B=128
-DEFINES       += COMPLIANCE_UX_160 HAVE_UX_LEGACY HAVE_UX_FLOW
+APP_SOURCE_PATH += deps/ledger-zxlib/include deps/ledger-zxlib/src
+
+ifneq ($(TARGET_NAME), TARGET_FATSTACKS)
+    $(info Using BAGL)
+    DEFINES += HAVE_BAGL
+    DEFINES += HAVE_UX_FLOW
+    ifeq ($(TARGET_NAME),TARGET_NANOS)
+        # Nano S
+        DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
+        DEFINES += COMPLIANCE_UX_160 HAVE_UX_LEGACY
+    else
+        DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
+        DEFINES += HAVE_GLO096
+        DEFINES += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
+        DEFINES += HAVE_BAGL_ELLIPSIS # long label truncation feature
+        DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
+        DEFINES += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
+        DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+    endif
 else
-DEFINES       += IO_SEPROXYHAL_BUFFER_SIZE_B=300
-DEFINES       += HAVE_GLO096
-DEFINES       += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
-DEFINES       += HAVE_BAGL_ELLIPSIS # long label truncation feature
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+    $(info Using NBGL)
+    DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
 
-DEFINES          += HAVE_UX_FLOW
-SDK_SOURCE_PATH  += lib_ux
+    APP_LOAD_PARAMS += --appFlags 0x200
 endif
+
+DEBUG = 0
+ifneq ($(DEBUG), 0)
+    $(info DEBUG enabled)
+    DEFINES += HAVE_IO_USB HAVE_USB_APDU
+    SDK_SOURCE_PATH  += lib_stusb lib_stusb_impl
+    DEFINES += HAVE_PRINTF
+    ifeq ($(TARGET_NAME), TARGET_NANOS)
+        DEFINES += PRINTF=screen_printf
+    else
+        DEFINES += PRINTF=mcu_usb_printf
+    endif
+else
+    DEFINES += PRINTF\(...\)=
+endif
+
 
 # X specific
 
 #Feature temporarily disabled
-DEFINES   += LEDGER_SPECIFIC
+DEFINES += LEDGER_SPECIFIC
 #DEFINES += TESTING_ENABLED
 
 # Compiler, assembler, and linker
 
 ifneq ($(BOLOS_ENV),)
-$(info BOLOS_ENV=$(BOLOS_ENV))
-CLANGPATH := $(BOLOS_ENV)/clang-arm-fropi/bin/
-GCCPATH := $(BOLOS_ENV)/gcc-arm-none-eabi-5_3-2016q1/bin/
+    $(info BOLOS_ENV=$(BOLOS_ENV))
+    CLANGPATH := $(BOLOS_ENV)/clang-arm-fropi/bin/
+    GCCPATH := $(BOLOS_ENV)/gcc-arm-none-eabi-5_3-2016q1/bin/
 else
-$(info BOLOS_ENV is not set: falling back to CLANGPATH and GCCPATH)
+    $(info BOLOS_ENV is not set: falling back to CLANGPATH and GCCPATH)
 endif
 
 ifeq ($(CLANGPATH),)
-$(info CLANGPATH is not set: clang will be used from PATH)
+    $(info CLANGPATH is not set: clang will be used from PATH)
 endif
 
 ifeq ($(GCCPATH),)
-$(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
+    $(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
 endif
 
 #########################
@@ -122,9 +148,15 @@ LDLIBS   += -lm -lgcc -lc
 ##########################
 include $(BOLOS_SDK)/Makefile.glyphs
 
-APP_SOURCE_PATH += src deps/ledger-zxlib/include deps/ledger-zxlib/src
+APP_SOURCE_PATH += src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
-SDK_SOURCE_PATH  += lib_ux
+
+ifeq ($(TARGET_NAME), TARGET_FATSTACKS)
+    SDK_SOURCE_PATH += lib_nbgl/src
+    SDK_SOURCE_PATH += lib_ux_fatstacks
+else ifneq ($(TARGET_NAME), TARGET_NANOS)
+    SDK_SOURCE_PATH  += lib_ux
+endif
 
 # nanopb
 include nanopb/extra/nanopb.mk
