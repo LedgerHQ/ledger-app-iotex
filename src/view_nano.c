@@ -18,43 +18,23 @@
 
 #if defined(HAVE_BAGL)
 
-#include "view.h"
-
+// BOLOS
 #include <ux.h>
 #include <os_io_seproxyhal.h>
-
 #include <bagl.h>
 #include <view_templates.h>
-
-#include <zxmacros.h>
-
-#include "crypto.h"
-#include "settings.h"
-
 #include <string.h>
 #include <stdio.h>
+//ZXLIB
+#include <zxmacros.h>
+
+#include "view.h"
+#include "crypto.h"
+#include "settings.h"
 
 viewctl_delegate_getData ehGetData = NULL;
 viewctl_delegate_accept ehAccept = NULL;
 viewctl_delegate_reject ehReject = NULL;
-
-#define MAX_VAL(a, b) ( (a)>(b) ? (a) : (b) )
-#define MIN_VAL(a, b) ( (a)<(b) ? (a) : (b) )
-
-#define VIEW_ADDR_MODE_ACCOUNT 0
-#define VIEW_ADDR_MODE_INDEX 1
-#define VIEW_ADDR_MODE_SHOW 2
-#define VIEW_ADDR_MODE_CONFIRM 3
-
-#define UIID_ICONACCEPT 0x50
-#define UIID_ICONREJECT 0x51
-#define UIID_ICONLEFT1  0x52
-#define UIID_ICONRIGHT1 0x53
-#define UIID_ICONLEFT2  0x54
-#define UIID_ICONRIGHT2 0x55
-
-#define UIID_MARKER1    0x60
-#define UIID_MARKER2    0x61
 
 static void accept_operation(unsigned int _) {
     UNUSED(_);
@@ -87,19 +67,7 @@ static void view_addr_choose_show(unsigned int _);
 static void view_addr_choose_refresh();
 static void view_addr_choose_update();
 
-
-struct {
-    // modes
-    // 0 - select account
-    // 1 - select index
-    struct {
-        unsigned int mode: 4;
-        unsigned int marker_blink: 1;
-    } status;
-    uint32_t account;
-    uint32_t index;
-} view_addr_choose_data;
-
+view_addr_choose_data_t view_addr_choose_data;
 
 #if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 
@@ -420,8 +388,7 @@ void view_idle(unsigned int ignored) {
 }
 
 #if defined(TARGET_NANOS)
-void view_status(unsigned int ignored) {
-    UNUSED(ignored);
+void view_status() {
     UX_MENU_DISPLAY(0, menu_status, NULL);
 }
 #endif // TARGET_NANOS

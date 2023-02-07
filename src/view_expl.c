@@ -18,14 +18,15 @@
 
 #if defined(HAVE_BAGL)
 
-#include <view_templates.h>
-#include <zxmacros.h>
+// BOLOS
 #include <ux.h>
 #include <bagl.h>
 #include <os_io_seproxyhal.h>
-
 #include <string.h>
 #include <stdio.h>
+// ZXLIB
+#include <view_templates.h>
+#include <zxmacros.h>
 
 #include "view.h"
 #include "view_expl.h"
@@ -180,7 +181,7 @@ const bagl_element_t *viewexpl_bagl_prepro(const bagl_element_t *element) {
 void viewexpl_display_ux() {
 #if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
     UX_DISPLAY(viewexpl_bagl, viewexpl_bagl_prepro);
-#else
+#elif defined(TARGET_NANOS)
     UX_DISPLAY(viewexpl_bagl_valuescrolling, viewexpl_bagl_prepro);
 #endif
 }

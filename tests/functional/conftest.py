@@ -18,11 +18,12 @@ APP_NAME = "iotex"
 
 BACKENDS = ["speculos", "ledgercomm", "ledgerwallet"]
 
-DEVICES = ["nanos", "nanox", "nanosp", "all"]
+DEVICES = ["nanos", "nanox", "nanosp", "stax", "all"]
 
 FIRMWARES = [Firmware('nanos', '2.1'),
              Firmware('nanox', '2.0.2'),
-             Firmware('nanosp', '1.0.3')]
+             Firmware('nanosp', '1.0.3'),
+             Firmware('stax', '1.0')]
 
 
 def pytest_addoption(parser):

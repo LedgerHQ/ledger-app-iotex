@@ -26,7 +26,7 @@ int16_t tx_getData(char *title,
                    int16_t chunk_index,
                    int16_t *page_count_out,
                    int16_t *chunk_count_out) {
-    /* Nonos max length 9 chars, Nonox can be different */
+    /* Nanos max length 9 chars, Nanox can be different */
     static const char action_name[][11] = {
         "INVALID",
         "Transfer",
