@@ -118,34 +118,6 @@ void tx_reject() {
 //endregion
 
 //region View Address Handlers
-
-int16_t addr_getData(char *title,
-                     int16_t max_title_length,
-                     char *key,
-                     int16_t max_key_length,
-                     char *value,
-                     int16_t max_value_length,
-                     int16_t page_index,
-                     int16_t chunk_index,
-                     int16_t *page_count_out,
-                     int16_t *chunk_count_out) {
-    UNUSED(max_value_length); // max_value_length is always large enough to store address
-    UNUSED(chunk_index);
-
-    if (page_count_out)
-        *page_count_out = 1;
-    if (chunk_count_out)
-        *chunk_count_out = 1;
-
-    snprintf(title, max_title_length, "Account %d", bip32_path[2] & 0x7FFFFFF);
-    snprintf(key, max_key_length, "index %d", page_index);
-    bip32_path[bip32_depth - 1] = page_index;
-
-    // get address from the current bip32_path
-    get_bech32_addr(value);
-    return 0;
-}
-
 void addr_accept() {
 #if defined(TARGET_NANOS)
     print_key("Returning");
@@ -167,9 +139,6 @@ void addr_accept() {
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, pos + 2);
     view_idle(0);
 }
-
-
-//endregion
 
 void addr_reject() {
     set_code(G_io_apdu_buffer, 0, APDU_CODE_COMMAND_NOT_ALLOWED);

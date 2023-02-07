@@ -252,7 +252,7 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                         THROW(APDU_CODE_DATA_INVALID);
                     }
 
-                    view_set_handlers(addr_getData, addr_accept, addr_reject);
+                    view_set_handlers(NULL, addr_accept, addr_reject);
                     view_addr_confirm(0);
 
                     *flags |= IO_ASYNCH_REPLY;
