@@ -23,6 +23,7 @@
 #include "ux.h"
 #include "bagl.h"
 #include "zxmacros.h"
+#include "os_io_seproxyhal.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -41,6 +42,7 @@ static const bagl_element_t viewexpl_bagl[] = {
 static unsigned int viewexpl_bagl_button(
     unsigned int button_mask,
     unsigned int button_mask_counter) {
+    UNUSED(button_mask_counter);
     switch (button_mask) {
         // Press both left and right to switch to value scrolling
         case BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT: {

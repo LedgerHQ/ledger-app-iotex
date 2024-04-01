@@ -51,7 +51,7 @@ void transaction_initialize() {
     buffering_init(
         ram_buffer,
         sizeof(ram_buffer),
-        N_appdata.buffer,
+        (uint8_t *)N_appdata.buffer,
         sizeof(N_appdata.buffer)
     );
 }

@@ -18,6 +18,7 @@ jobs:
   build:
     name: Build application for NanoS, X and S+
     strategy:
+      fail-fast: false
       matrix:
         include:
           - SDK: "$NANOS_SDK"
@@ -34,28 +35,63 @@ jobs:
       - name: Build app
         run: |
           make clean
-          make DEBUG=1 BOLOS_SDK=${{ matrix.SDK }}
-          mv bin/app.elf "bin/${{ matrix.model }}.elf"
+          make TESTING=1 BOLOS_SDK=${{ matrix.SDK }}
+          mv bin/app.elf "bin/iotex_${{ matrix.model }}.elf"
       - name: Upload app binary
         uses: actions/upload-artifact@v3
         with:
-          name: apps-debug
+          name: apps-testing
           path: bin/
+
+  functional_tests:
+    name: Ragger functional tests
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - SDK: "$NANOS_SDK"
+            model: nanos
+          - SDK: "$NANOX_SDK"
+            model: nanox
+          - SDK: "$NANOSP_SDK"
+            model: nanosp
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download app binary
+        uses: actions/download-artifact@v3
+        with:
+          name: apps-testing
+          path: tests/elfs
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y qemu-user-static
+          pip install --extra-index-url https://test.pypi.org/simple/ -r tests/functional/requirements.txt
+      - name: Run test
+        run: pytest --tb=short -v --device ${{ matrix.model }} tests/functional/
 
   scan-build:
     name: Clang Static Analyzer
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - SDK: "$NANOS_SDK"
+            model: nanos
+          - SDK: "$NANOX_SDK"
+            model: nanox
+          - SDK: "$NANOSP_SDK"
+            model: nanosp
     runs-on: ubuntu-latest
-
     container:
       image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
-
     steps:
       - uses: actions/checkout@v3
-
       - name: Build with Clang Static Analyzer
         run: |
           make clean
-          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default BOLOS_SDK=${{ matrix.SDK }}
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
